@@ -128,7 +128,7 @@ public class DongGopService {
 			String sqlUpdate = "update dong_gop set "
 					+ "ten_dong_gop = ?, "
 					+ "ngay_bat_dau = ?, "
-					+ "ngay_ket_thuc = ?, " 
+					+ "ngay_ket_thuc = ? " 
 					+ "where ID = " + dsDongGop.getIdDongGop();
 			PreparedStatement preparedStatement = (PreparedStatement) connection.prepareStatement(sqlUpdate);
 			preparedStatement.setString(1, dsDongGop.getTenDongGop());
@@ -188,5 +188,76 @@ public class DongGopService {
 			e.printStackTrace();
 		}
 		return sum;
+	}
+	
+	public int tongHoDongGop(DanhSachDongGop dsDongGop) {
+		int sum = 0;
+		try {
+			Connection connection = (Connection) MysqlConnection.getMysqlConnection();
+			String sqlSelect = "select SUM(so_tien_dong) tong_ho_dong_gop from quan_ly_dong_gop "
+					+ "where id_donggop = " + dsDongGop.getIdDongGop();
+			PreparedStatement preparedStatement = (PreparedStatement) connection.prepareStatement(sqlSelect);
+			ResultSet rs = preparedStatement.executeQuery();
+			rs.first();
+			sum = rs.getInt("tong_ho_dong_gop");
+			
+			preparedStatement.close();
+			connection.close();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return sum;
+	}
+	
+	public ArrayList<DanhSachDongGop> cacHoDaDong(HoDongGop hoDongGop) {
+		ArrayList<DanhSachDongGop> dsDongGop = new ArrayList<DanhSachDongGop>();
+		try {
+			Connection connection = (Connection) MysqlConnection.getMysqlConnection();
+			String sqlSelect = "select ID, ten_dong_gop, ngay_bat_dau, ngay_ket_thuc from quan_ly_dong_gop, dong_gop"
+					+ " where id_hokhau = " + hoDongGop.getIdHoKhau()
+					+ " and id_hokhau = ID";
+			PreparedStatement preparedStatement = (PreparedStatement) connection.prepareStatement(sqlSelect);
+			ResultSet rs = preparedStatement.executeQuery();
+			while(rs.next()) {
+				DanhSachDongGop dsDG = new DanhSachDongGop();
+				dsDG.setIdDongGop(rs.getInt("ID"));
+				dsDG.setTenDongGop(rs.getString("ten_dong_gop"));
+				dsDG.setBatDau(rs.getString("ngay_bat_dau"));
+				dsDG.setKetThuc(rs.getString("ngay_ket_thuc"));
+				dsDongGop.add(dsDG);
+			}
+			
+			preparedStatement.close();
+			connection.close();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return dsDongGop;
+	}
+	
+	public ArrayList<Integer> soTienDongGop(HoDongGop hoDongGop) {
+		ArrayList<Integer> soTienDong = new ArrayList<Integer>();
+		try {
+			Connection connection = (Connection) MysqlConnection.getMysqlConnection();
+			String sqlSelect = "select so_tien_dong from quan_ly_dong_gop"
+					+ " where id_hokhau = " + hoDongGop.getIdHoKhau();
+			PreparedStatement preparedStatement = (PreparedStatement) connection.prepareStatement(sqlSelect);
+			ResultSet rs = preparedStatement.executeQuery();
+			while(rs.next()) {
+				soTienDong.add(rs.getInt("so_tien_dong"));
+			}
+			
+			preparedStatement.close();
+			connection.close();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return soTienDong;
 	}
 }
